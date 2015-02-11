@@ -112,6 +112,8 @@ static HighlightSelectedString *sharedPlugin;
 {
     NSTextView *textView = self.sourceTextView;
     
+    NSRect rect = [textView visibleRect];
+    
     NSRange selectedRange = [textView selectedRange];
     
     if (selectedRange.length==0 && _haveHighLight) {
@@ -133,6 +135,8 @@ static HighlightSelectedString *sharedPlugin;
     if (self.selectedText.length) {
         [self highlightSelectedStrings];
     }
+    
+    [textView scrollRectToVisible:rect];
     
 }
 
