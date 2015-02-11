@@ -10,14 +10,14 @@
 	<string>HighlightSelectedString</string>
 	<key>IDESourceControlProjectOriginsDictionary</key>
 	<dict>
-		<key>13E17D022CEB7197B054F7AF24D08C82BD928F67</key>
+		<key>42162399AB7E90C17FBC7C2818887F5596B18321</key>
 		<string>https://github.com/keepyounger/HighlightSelectedString.git</string>
 	</dict>
 	<key>IDESourceControlProjectPath</key>
 	<string>HighlightSelectedString.xcodeproj</string>
 	<key>IDESourceControlProjectRelativeInstallPathDictionary</key>
 	<dict>
-		<key>13E17D022CEB7197B054F7AF24D08C82BD928F67</key>
+		<key>42162399AB7E90C17FBC7C2818887F5596B18321</key>
 		<string>../..</string>
 	</dict>
 	<key>IDESourceControlProjectURL</key>
@@ -25,14 +25,14 @@
 	<key>IDESourceControlProjectVersion</key>
 	<integer>111</integer>
 	<key>IDESourceControlProjectWCCIdentifier</key>
-	<string>13E17D022CEB7197B054F7AF24D08C82BD928F67</string>
+	<string>42162399AB7E90C17FBC7C2818887F5596B18321</string>
 	<key>IDESourceControlProjectWCConfigurations</key>
 	<array>
 		<dict>
 			<key>IDESourceControlRepositoryExtensionIdentifierKey</key>
 			<string>public.vcs.git</string>
 			<key>IDESourceControlWCCIdentifierKey</key>
-			<string>13E17D022CEB7197B054F7AF24D08C82BD928F67</string>
+			<string>42162399AB7E90C17FBC7C2818887F5596B18321</string>
 			<key>IDESourceControlWCCName</key>
 			<string>HighlightSelectedString</string>
 		</dict>

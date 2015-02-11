@@ -23,8 +23,6 @@ static HighlightSelectedString *sharedPlugin;
 @property (nonatomic, strong) NSMenuItem *aMenuItem;
 @property (nonatomic, strong) NSColor *highlightColor;
 
-@property (nonatomic) BOOL lock;
-
 @end
 
 @implementation HighlightSelectedString
@@ -50,7 +48,6 @@ static HighlightSelectedString *sharedPlugin;
     if (self = [super init]) {
 
         _haveHighLight = NO;
-        _lock = NO;
         
         [[NSNotificationCenter defaultCenter] addObserver:self
                                                  selector:@selector(applicationDidFinishLaunching:)
@@ -68,16 +65,6 @@ static HighlightSelectedString *sharedPlugin;
                                                  name:NSTextViewDidChangeSelectionNotification
                                                object:nil];
     
-    [[NSNotificationCenter defaultCenter] addObserver:self
-                                             selector:@selector(lockEdit:)
-                                                 name:NSTextViewDidChangeTypingAttributesNotification
-                                               object:nil];
-    //DVTSourceExpressionUnderMouseDidChangeNotification DVTSourceExpressionSelectedExpressionDidChangeNotification
-    [[NSNotificationCenter defaultCenter] addObserver:self
-                                             selector:@selector(unlockEdit:)
-                                                 name:@"DVTSourceExpressionSelectedExpressionDidChangeNotification"//NSViewDidUpdateTrackingAreasNotification
-                                               object:nil];
-    
     _highlightColor = [NSColor colorWithCalibratedRed:1.000 green:0.992 blue:0.518 alpha:1.000];
     NSMenuItem *editMenuItem = [[NSApp mainMenu] itemWithTitle:@"Edit"];
     
@@ -91,16 +78,6 @@ static HighlightSelectedString *sharedPlugin;
         _aMenuItem.state = state;
         [[editMenuItem submenu] addItem:_aMenuItem];
     }
-}
-
-- (void)lockEdit:(NSNotification*)not
-{
-    _lock = YES;
-}
-
-- (void)unlockEdit:(NSNotification*)not
-{
-    _lock = NO;
 }
 
 - (void)enableState
@@ -122,7 +99,7 @@ static HighlightSelectedString *sharedPlugin;
         IDESourceCodeDocument *document = [RCXcode currentSourceCodeDocument];
         NSTextView *textView = self.sourceTextView;
         
-        if (!document || !textView || _aMenuItem.state == 0 || [noti object] != textView || _lock) {
+        if (!document || !textView || _aMenuItem.state == 0 || [noti object] != textView) {
             return;
         }
         
@@ -133,10 +110,6 @@ static HighlightSelectedString *sharedPlugin;
 }
 - (void)todoSomething
 {
-    /**
-     [MT] DVTAssertions: UNCAUGHT EXCEPTION (NSInternalInconsistencyException): -[DVTLayoutManager _fillGlyphHoleForCharacterRange:startGlyphIndex:desiredNumberOfCharacters:] *** attempted glyph generation while textStorage is editing.  It is not valid to cause the layoutManager to do glyph generation while the textStorage is editing (ie the textStorage has been sent a beginEditing message without a matching endEditing.)
-     */
-    
     NSTextView *textView = self.sourceTextView;
     
     NSRange selectedRange = [textView selectedRange];
@@ -171,9 +144,14 @@ static HighlightSelectedString *sharedPlugin;
 
     NSTextStorage *textStorage = self.textStorage;
     
-    [textStorage beginEditing];
-    [self addBgColorWithRangArray:array];
-    [textStorage endEditing];
+    if (textStorage.editedRange.location == NSNotFound) {
+        
+        [textStorage beginEditing];
+        [self addBgColorWithRangArray:array];
+        [textStorage endEditing];
+        
+    }
+
 }
 
 - (void)addBgColorWithRangArray:(NSArray*)rangeArray
@@ -184,8 +162,7 @@ static HighlightSelectedString *sharedPlugin;
        
         NSValue *value = obj;
         NSRange range = [value rangeValue];
-        
-        [textView.layoutManager addTemporaryAttribute:NSBackgroundColorAttributeName value:_highlightColor forCharacterRange:range];
+        [textView.textStorage addAttribute:NSBackgroundColorAttributeName value:_highlightColor range:range];
         [textView setNeedsDisplay:YES];
         
     }];
@@ -225,9 +202,13 @@ static HighlightSelectedString *sharedPlugin;
     
     NSTextView *textView = self.sourceTextView;
     
-    [textView.textStorage beginEditing];
-    [textView.layoutManager removeTemporaryAttribute:NSBackgroundColorAttributeName forCharacterRange:documentRange];
-    [textView.textStorage endEditing];
+    if (textView.textStorage.editedRange.location == NSNotFound) {
+        
+        [textView.textStorage beginEditing];
+        [textView.textStorage removeAttribute:NSBackgroundColorAttributeName range:documentRange];
+        [textView.textStorage endEditing];
+        
+    }
     
 }
 
