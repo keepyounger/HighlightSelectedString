@@ -118,6 +118,7 @@ static HighlightSelectedString *sharedPlugin;
     
     if (selectedRange.length==0 && _haveHighLight) {
         [self removeAllHighlighting];
+        [textView scrollRectToVisible:rect];
         return;
     } else if (selectedRange.length == 0) {
         return;
