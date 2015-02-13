@@ -111,14 +111,13 @@ static HighlightSelectedString *sharedPlugin;
 - (void)todoSomething
 {
     NSTextView *textView = self.sourceTextView;
-    
+
     NSRect rect = [textView visibleRect];
-    
     NSRange selectedRange = [textView selectedRange];
     
     if (selectedRange.length==0 && _haveHighLight) {
         [self removeAllHighlighting];
-        [textView scrollRectToVisible:rect];
+        [self performSelector:@selector(scrollowToRect:) withObject:[NSValue valueWithRect:rect] afterDelay:0];
         return;
     } else if (selectedRange.length == 0) {
         return;
@@ -127,7 +126,7 @@ static HighlightSelectedString *sharedPlugin;
     NSString *text = textView.textStorage.string;
     NSString *nSelectedStr = [[text substringWithRange:selectedRange] stringByTrimmingCharactersInSet:[NSCharacterSet characterSetWithCharactersInString:@" \n"]];
     
-    if (nSelectedStr.length && ![nSelectedStr isEqualToString:self.selectedText]) {
+    if (nSelectedStr.length && ![nSelectedStr isEqualToString:self.selectedText] &&_haveHighLight) {
         [self removeAllHighlighting];
     }
     
@@ -136,16 +135,25 @@ static HighlightSelectedString *sharedPlugin;
     if (self.selectedText.length) {
         [self highlightSelectedStrings];
     }
-    
-    [textView scrollRectToVisible:rect];
-    
+
+    [self performSelector:@selector(scrollowToRect:) withObject:[NSValue valueWithRect:rect] afterDelay:0];
+
+}
+
+- (void)scrollowToRect:(NSValue*)rect
+{
+    [self.sourceTextView scrollRectToVisible:rect.rectValue];
 }
 
 #pragma mark Highlighting
 - (void)highlightSelectedStrings
 {
-    _haveHighLight = YES;
     NSArray *array = [self rangesOfString:self.selectedText];
+    if (array.count<2) {
+        return;
+    }
+    
+    _haveHighLight = YES;
 
     NSTextStorage *textStorage = self.textStorage;
     
@@ -168,8 +176,14 @@ static HighlightSelectedString *sharedPlugin;
         NSValue *value = obj;
         NSRange range = [value rangeValue];
         [textView.textStorage addAttribute:NSBackgroundColorAttributeName value:_highlightColor range:range];
-        [textView setNeedsDisplay:YES];
         
+        // Add a color mark to the scroller
+        NSLayoutManager *layoutManager = [self.sourceTextView layoutManager];
+        NSRange glyphRange = [layoutManager glyphRangeForCharacterRange:range actualCharacterRange:NULL];
+        NSRect lineRect = [layoutManager lineFragmentRectForGlyphAtIndex:glyphRange.location effectiveRange:NULL];
+        CGFloat rangeRatio = lineRect.origin.y / [self.sourceTextView bounds].size.height;
+        
+        [textView setNeedsDisplay:YES];
     }];
     
 }
@@ -206,7 +220,7 @@ static HighlightSelectedString *sharedPlugin;
     NSRange documentRange = NSMakeRange(0, [[self.textStorage string] length]);
     
     NSTextView *textView = self.sourceTextView;
-    
+
     if (textView.textStorage.editedRange.location == NSNotFound) {
         
         [textView.textStorage beginEditing];
