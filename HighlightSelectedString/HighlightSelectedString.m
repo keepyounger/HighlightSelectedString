@@ -176,13 +176,6 @@ static HighlightSelectedString *sharedPlugin;
         NSValue *value = obj;
         NSRange range = [value rangeValue];
         [textView.textStorage addAttribute:NSBackgroundColorAttributeName value:_highlightColor range:range];
-        
-        // Add a color mark to the scroller
-        NSLayoutManager *layoutManager = [self.sourceTextView layoutManager];
-        NSRange glyphRange = [layoutManager glyphRangeForCharacterRange:range actualCharacterRange:NULL];
-        NSRect lineRect = [layoutManager lineFragmentRectForGlyphAtIndex:glyphRange.location effectiveRange:NULL];
-        CGFloat rangeRatio = lineRect.origin.y / [self.sourceTextView bounds].size.height;
-        
         [textView setNeedsDisplay:YES];
     }];
     
