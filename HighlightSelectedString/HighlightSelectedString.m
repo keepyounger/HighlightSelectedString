@@ -103,6 +103,7 @@ static HighlightSelectedString *sharedPlugin;
             return;
         }
         
+        //延迟0.1秒执行高亮
         [[self class] cancelPreviousPerformRequestsWithTarget:self selector:@selector(todoSomething) object:nil];
         [self performSelector:@selector(todoSomething) withObject:nil afterDelay:0.1f];
 
@@ -112,12 +113,10 @@ static HighlightSelectedString *sharedPlugin;
 {
     NSTextView *textView = self.sourceTextView;
 
-    NSRect rect = [textView visibleRect];
     NSRange selectedRange = [textView selectedRange];
     
     if (selectedRange.length==0 && _haveHighLight) {
         [self removeAllHighlighting];
-        [self performSelector:@selector(scrollowToRect:) withObject:[NSValue valueWithRect:rect] afterDelay:0];
         return;
     } else if (selectedRange.length == 0) {
         return;
@@ -136,14 +135,8 @@ static HighlightSelectedString *sharedPlugin;
         [self highlightSelectedStrings];
     }
 
-    [self performSelector:@selector(scrollowToRect:) withObject:[NSValue valueWithRect:rect] afterDelay:0];
-
 }
 
-- (void)scrollowToRect:(NSValue*)rect
-{
-    [self.sourceTextView scrollRectToVisible:rect.rectValue];
-}
 
 #pragma mark Highlighting
 - (void)highlightSelectedStrings
@@ -159,9 +152,7 @@ static HighlightSelectedString *sharedPlugin;
     
     if (textStorage.editedRange.location == NSNotFound) {
         
-        [textStorage beginEditing];
         [self addBgColorWithRangArray:array];
-        [textStorage endEditing];
         
     }
 
@@ -175,7 +166,7 @@ static HighlightSelectedString *sharedPlugin;
        
         NSValue *value = obj;
         NSRange range = [value rangeValue];
-        [textView.textStorage addAttribute:NSBackgroundColorAttributeName value:_highlightColor range:range];
+        [textView.layoutManager addTemporaryAttribute:NSBackgroundColorAttributeName value:_highlightColor forCharacterRange:range];
         [textView setNeedsDisplay:YES];
     }];
     
@@ -216,9 +207,7 @@ static HighlightSelectedString *sharedPlugin;
 
     if (textView.textStorage.editedRange.location == NSNotFound) {
         
-        [textView.textStorage beginEditing];
-        [textView.textStorage removeAttribute:NSBackgroundColorAttributeName range:documentRange];
-        [textView.textStorage endEditing];
+        [textView.layoutManager removeTemporaryAttribute:NSBackgroundColorAttributeName forCharacterRange:documentRange];
         
     }
     
