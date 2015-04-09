@@ -277,6 +277,7 @@
 				5A3A69041A72447200AAD00A /* Release */,
 			);
 			defaultConfigurationIsVisible = 0;
+			defaultConfigurationName = Release;
 		};
 /* End XCConfigurationList section */
 	};
