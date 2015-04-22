@@ -6,7 +6,7 @@ Highlight The String which is same to Selected String.
 <br/>
 <img  src="demo.png"  alt="demo.png" />
 # Update
-In the Edit menu, you can set Selected Color.
+In the Edit menu, you can set Highlight Color.
 <br/>
 <br/>
 <img  src="menu.png"  alt="menu.png" />
