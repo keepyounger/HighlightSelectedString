@@ -107,6 +107,14 @@ static HighlightSelectedString *sharedPlugin;
 
 - (void)setHighlightColor
 {
+    //解除与ColorSense-for-Xcode的关联
+    [self.sourceTextView.subviews enumerateObjectsUsingBlock:^(id obj, NSUInteger idx, BOOL *stop) {
+        if ([obj isKindOfClass:[NSColorWell class]]) {
+            NSColorWell *colorWell = obj;
+            [colorWell deactivate];
+        }
+    }];
+    
     [NSColorPanel sharedColorPanel].color = self.highlightColor;
     [[NSColorPanel sharedColorPanel] orderFront:self];
 
@@ -152,7 +160,9 @@ static HighlightSelectedString *sharedPlugin;
 
 -(void)selectionDidChange:(NSNotification *)noti {
     
-    if ([NSColorPanel sharedColorPanel].isVisible) {
+    NSString *isHighlight = objc_getAssociatedObject([NSColorPanel sharedColorPanel], &extrnPro);
+    
+    if ([NSColorPanel sharedColorPanel].visible && [isHighlight boolValue]) {
         [[NSColorPanel sharedColorPanel] orderOut:nil];
     }
     
@@ -304,6 +314,16 @@ static HighlightSelectedString *sharedPlugin;
 {
     objc_setAssociatedObject(self, &extrnPro, @"0", OBJC_ASSOCIATION_RETAIN);
     [super orderOut:sender];
+}
+
+- (void)orderFront:(id)sender
+{
+    if (sender == [HighlightSelectedString sharedPlugin]) {
+        objc_setAssociatedObject(self, &extrnPro, @"1", OBJC_ASSOCIATION_RETAIN);
+    } else {
+        objc_setAssociatedObject(self, &extrnPro, @"0", OBJC_ASSOCIATION_RETAIN);
+    }
+    [super orderFront:sender];
 }
 
 @end
