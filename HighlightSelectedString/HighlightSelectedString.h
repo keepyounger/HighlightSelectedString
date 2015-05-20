@@ -8,8 +8,14 @@
 
 #import <AppKit/AppKit.h>
 
+static char extrnPro;
+
 @interface HighlightSelectedString : NSObject
 
 + (instancetype)sharedPlugin;
+
+@end
+
+@interface HighlightColorPanel : NSColorPanel
 
 @end

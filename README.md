@@ -5,8 +5,12 @@ Highlight The String which is same to Selected String.
 <br/>
 <br/>
 <img  src="demo.png"  alt="demo.png" />
-# Important Update
-fix issue: Xcode crash.
+# Update
+In the Edit menu, you can set Highlight Color.
+<br/>
+<br/>
+<img  src="menu.png"  alt="menu.png" />
+
 # Thanks
 <a href ="http://www.onevcat.com/2013/02/xcode-plugin/"> Xcode 4 插件制作入门 </a> <br/>
 <a href ="https://github.com/fortinmike/XcodeBoost"> XcodeBoost </a> <br/>

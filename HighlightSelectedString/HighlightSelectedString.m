@@ -8,6 +8,7 @@
 
 #import "HighlightSelectedString.h"
 #import "RCXcode.h"
+#import <objc/runtime.h>
 
 static HighlightSelectedString *sharedPlugin;
 
@@ -34,6 +35,7 @@ static HighlightSelectedString *sharedPlugin;
     if ([currentApplicationName isEqual:@"Xcode"]) {
         dispatch_once(&onceToken, ^{
             sharedPlugin = [[self alloc] initWithBundle:plugin];
+            object_setClass([NSColorPanel sharedColorPanel], [HighlightColorPanel class]);
         });
     }
 }
@@ -65,10 +67,29 @@ static HighlightSelectedString *sharedPlugin;
                                                  name:NSTextViewDidChangeSelectionNotification
                                                object:nil];
     
-    _highlightColor = [NSColor colorWithCalibratedRed:1.000 green:0.992 blue:0.518 alpha:1.000];
-    NSMenuItem *editMenuItem = [[NSApp mainMenu] itemWithTitle:@"Edit"];
+    [[NSNotificationCenter defaultCenter] addObserver:self selector:@selector(colorPanelColorDidChange:) name:NSColorPanelColorDidChangeNotification object:nil];
     
     NSUserDefaults *userD = [NSUserDefaults standardUserDefaults];
+
+    NSArray *array = [userD objectForKey:@"highlightColor"];
+    if (array) {
+        
+        CGFloat red = [array[0] floatValue];
+        CGFloat green = [array[1] floatValue];
+        CGFloat blue = [array[2] floatValue];
+        CGFloat alpha = [array[3] floatValue];
+        
+        _highlightColor = [NSColor colorWithCalibratedRed:red green:green blue:blue alpha:alpha];
+
+        
+    } else {
+        _highlightColor = [NSColor colorWithCalibratedRed:1.000 green:0.992 blue:0.518 alpha:1.000];
+
+    }
+    
+    
+    NSMenuItem *editMenuItem = [[NSApp mainMenu] itemWithTitle:@"Edit"];
+    
     NSInteger state = [userD objectForKey:@"selectedState"]?[[userD objectForKey:@"selectedState"] integerValue]:1;
     
     if (editMenuItem) {
@@ -77,7 +98,51 @@ static HighlightSelectedString *sharedPlugin;
         [_aMenuItem setTarget:self];
         _aMenuItem.state = state;
         [[editMenuItem submenu] addItem:_aMenuItem];
+        
+        NSMenuItem *setting = [[NSMenuItem alloc] initWithTitle:@"Set Highlight Color" action:@selector(setHighlightColor) keyEquivalent:@""];
+        [setting setTarget:self];
+        [[editMenuItem submenu] addItem:setting];
     }
+}
+
+- (void)setHighlightColor
+{
+    //解除与ColorSense-for-Xcode的关联
+    [self.sourceTextView.subviews enumerateObjectsUsingBlock:^(id obj, NSUInteger idx, BOOL *stop) {
+        if ([obj isKindOfClass:[NSColorWell class]]) {
+            NSColorWell *colorWell = obj;
+            [colorWell deactivate];
+        }
+    }];
+    
+    [NSColorPanel sharedColorPanel].color = self.highlightColor;
+    [[NSColorPanel sharedColorPanel] orderFront:self];
+
+    objc_setAssociatedObject([NSColorPanel sharedColorPanel], &extrnPro, @"1", OBJC_ASSOCIATION_RETAIN);
+
+}
+
+- (void)colorPanelColorDidChange:(NSNotification*)not
+{
+    NSString *isHighlight = objc_getAssociatedObject([NSColorPanel sharedColorPanel], &extrnPro);
+    
+    if (isHighlight && [isHighlight boolValue]) {
+        
+        self.highlightColor = [NSColorPanel sharedColorPanel].color;
+        
+        CGFloat red = 0;
+        CGFloat green = 0;
+        CGFloat blue = 0;
+        CGFloat alpha = 0;
+        
+        [self.highlightColor getRed:&red green:&green blue:&blue alpha:&alpha];
+        
+        NSArray *array = @[@(red), @(green), @(blue), @(alpha)];
+        NSUserDefaults *userD = [NSUserDefaults standardUserDefaults];
+        [userD setObject:array forKey:@"highlightColor"];
+        [userD synchronize];
+    }
+
 }
 
 - (void)enableState
@@ -94,6 +159,13 @@ static HighlightSelectedString *sharedPlugin;
 }
 
 -(void)selectionDidChange:(NSNotification *)noti {
+    
+    NSString *isHighlight = objc_getAssociatedObject([NSColorPanel sharedColorPanel], &extrnPro);
+    
+    if ([NSColorPanel sharedColorPanel].visible && [isHighlight boolValue]) {
+        [[NSColorPanel sharedColorPanel] orderOut:nil];
+    }
+    
     if ([[noti object] isKindOfClass:[NSTextView class]]) {
         
         IDESourceCodeDocument *document = [RCXcode currentSourceCodeDocument];
@@ -232,6 +304,26 @@ static HighlightSelectedString *sharedPlugin;
 - (void)dealloc
 {
     [[NSNotificationCenter defaultCenter] removeObserver:self];
+}
+
+@end
+
+@implementation HighlightColorPanel
+
+- (void)orderOut:(id)sender
+{
+    objc_setAssociatedObject(self, &extrnPro, @"0", OBJC_ASSOCIATION_RETAIN);
+    [super orderOut:sender];
+}
+
+- (void)orderFront:(id)sender
+{
+    if (sender == [HighlightSelectedString sharedPlugin]) {
+        objc_setAssociatedObject(self, &extrnPro, @"1", OBJC_ASSOCIATION_RETAIN);
+    } else {
+        objc_setAssociatedObject(self, &extrnPro, @"0", OBJC_ASSOCIATION_RETAIN);
+    }
+    [super orderFront:sender];
 }
 
 @end
