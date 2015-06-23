@@ -7,7 +7,6 @@
 //
 
 #import "HighlightSelectedString.h"
-#import "RCXcode.h"
 #import <objc/runtime.h>
 
 static HighlightSelectedString *sharedPlugin;
@@ -16,11 +15,10 @@ static HighlightSelectedString *sharedPlugin;
 
 @property (nonatomic,copy) NSString *selectedText;
 
-@property (readonly, unsafe_unretained) NSTextView *sourceTextView;
+@property (nonatomic, unsafe_unretained) NSTextView *sourceTextView;
 @property (readonly) NSTextStorage *textStorage;
 @property (readonly) NSString *string;
 
-@property (nonatomic) BOOL haveHighLight;
 @property (nonatomic, strong) NSMenuItem *aMenuItem;
 @property (nonatomic, strong) NSColor *highlightColor;
 
@@ -48,8 +46,6 @@ static HighlightSelectedString *sharedPlugin;
 - (id)initWithBundle:(NSBundle *)plugin
 {
     if (self = [super init]) {
-
-        _haveHighLight = NO;
         
         [[NSNotificationCenter defaultCenter] addObserver:self
                                                  selector:@selector(applicationDidFinishLaunching:)
@@ -149,7 +145,7 @@ static HighlightSelectedString *sharedPlugin;
 {
     _aMenuItem.state = _aMenuItem.state == 1? 0 : 1;
     
-    if (_aMenuItem.state == 0 && _haveHighLight) {
+    if (_aMenuItem.state == 0) {
         [self removeAllHighlighting];
     }
     
@@ -168,16 +164,23 @@ static HighlightSelectedString *sharedPlugin;
     
     if ([[noti object] isKindOfClass:[NSTextView class]]) {
         
-        IDESourceCodeDocument *document = [RCXcode currentSourceCodeDocument];
-        NSTextView *textView = self.sourceTextView;
+        NSTextView *textView = [noti object];
         
-        if (!document || !textView || _aMenuItem.state == 0 || [noti object] != textView) {
+        if (_aMenuItem.state == 0) {
             return;
         }
         
-        //延迟0.1秒执行高亮
-        [[self class] cancelPreviousPerformRequestsWithTarget:self selector:@selector(todoSomething) object:nil];
-        [self performSelector:@selector(todoSomething) withObject:nil afterDelay:0.1f];
+        NSString *className = NSStringFromClass([textView class]);
+        
+        if ([className isEqualToString:@"DVTSourceTextView"]/* 代码编辑器 */ || [className isEqualToString:@"IDEConsoleTextView"] /* 控制台 */) {
+            
+            self.sourceTextView = textView;
+
+            //延迟0.1秒执行高亮
+            [[self class] cancelPreviousPerformRequestsWithTarget:self selector:@selector(todoSomething) object:nil];
+            [self performSelector:@selector(todoSomething) withObject:nil afterDelay:0.1f];
+            
+        }
 
     }
 }
@@ -187,18 +190,17 @@ static HighlightSelectedString *sharedPlugin;
 
     NSRange selectedRange = [textView selectedRange];
     
-    if (selectedRange.length==0 && _haveHighLight) {
+    if (selectedRange.length==0) {
         [self removeAllHighlighting];
-        return;
-    } else if (selectedRange.length == 0) {
         return;
     }
     
     NSString *text = textView.textStorage.string;
     NSString *nSelectedStr = [[text substringWithRange:selectedRange] stringByTrimmingCharactersInSet:[NSCharacterSet characterSetWithCharactersInString:@" \n"]];
     
-    if (nSelectedStr.length && ![nSelectedStr isEqualToString:self.selectedText] &&_haveHighLight) {
+    if (!nSelectedStr.length) {
         [self removeAllHighlighting];
+        return;
     }
     
     self.selectedText = nSelectedStr;
@@ -218,16 +220,8 @@ static HighlightSelectedString *sharedPlugin;
         return;
     }
     
-    _haveHighLight = YES;
-
-    NSTextStorage *textStorage = self.textStorage;
+    [self addBgColorWithRangArray:array];
     
-    if (textStorage.editedRange.location == NSNotFound) {
-        
-        [self addBgColorWithRangArray:array];
-        
-    }
-
 }
 
 - (void)addBgColorWithRangArray:(NSArray*)rangeArray
@@ -239,8 +233,9 @@ static HighlightSelectedString *sharedPlugin;
         NSValue *value = obj;
         NSRange range = [value rangeValue];
         [textView.layoutManager addTemporaryAttribute:NSBackgroundColorAttributeName value:_highlightColor forCharacterRange:range];
-        [textView setNeedsDisplay:YES];
     }];
+    
+    [textView setNeedsDisplay:YES];
     
 }
 
@@ -270,18 +265,13 @@ static HighlightSelectedString *sharedPlugin;
     return rangArray;
 }
 
-- (void)removeAllHighlighting
+- (void)removeAllHighlighting   
 {
-    _haveHighLight = NO;
     NSRange documentRange = NSMakeRange(0, [[self.textStorage string] length]);
     
     NSTextView *textView = self.sourceTextView;
 
-    if (textView.textStorage.editedRange.location == NSNotFound) {
-        
-        [textView.layoutManager removeTemporaryAttribute:NSBackgroundColorAttributeName forCharacterRange:documentRange];
-        
-    }
+    [textView.layoutManager removeTemporaryAttribute:NSBackgroundColorAttributeName forCharacterRange:documentRange];
     
 }
 
@@ -294,11 +284,6 @@ static HighlightSelectedString *sharedPlugin;
 - (NSString *)string
 {
     return [self.textStorage string];
-}
-
-- (NSTextView *)sourceTextView
-{
-    return [RCXcode currentSourceCodeTextView];
 }
 
 - (void)dealloc

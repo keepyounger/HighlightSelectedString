@@ -7,14 +7,14 @@
 	<key>IDESourceControlProjectIdentifier</key>
 	<string>AD6D9883-5E79-4FF2-8ECA-07A08F729904</string>
 	<key>IDESourceControlProjectName</key>
-	<string>project</string>
+	<string>HighlightSelectedString</string>
 	<key>IDESourceControlProjectOriginsDictionary</key>
 	<dict>
 		<key>42162399AB7E90C17FBC7C2818887F5596B18321</key>
 		<string>https://github.com/keepyounger/HighlightSelectedString.git</string>
 	</dict>
 	<key>IDESourceControlProjectPath</key>
-	<string>HighlightSelectedString.xcodeproj/project.xcworkspace</string>
+	<string>HighlightSelectedString.xcodeproj</string>
 	<key>IDESourceControlProjectRelativeInstallPathDictionary</key>
 	<dict>
 		<key>42162399AB7E90C17FBC7C2818887F5596B18321</key>
