@@ -187,19 +187,16 @@ static HighlightSelectedString *sharedPlugin;
 - (void)todoSomething
 {
     NSTextView *textView = self.sourceTextView;
+    
+    //每次高亮 都撤销之前高亮
+    [self removeAllHighlighting];
 
     NSRange selectedRange = [textView selectedRange];
-    
-    if (selectedRange.length==0) {
-        [self removeAllHighlighting];
-        return;
-    }
-    
     NSString *text = textView.textStorage.string;
     NSString *nSelectedStr = [[text substringWithRange:selectedRange] stringByTrimmingCharactersInSet:[NSCharacterSet characterSetWithCharactersInString:@" \n"]];
     
+    //如果新选中的长度为0 就不执行任何操作
     if (!nSelectedStr.length) {
-        [self removeAllHighlighting];
         return;
     }
     
