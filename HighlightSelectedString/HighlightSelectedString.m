@@ -33,7 +33,6 @@ static HighlightSelectedString *sharedPlugin;
     if ([currentApplicationName isEqual:@"Xcode"]) {
         dispatch_once(&onceToken, ^{
             sharedPlugin = [[self alloc] initWithBundle:plugin];
-            object_setClass([NSColorPanel sharedColorPanel], [HighlightColorPanel class]);
         });
     }
 }
@@ -62,8 +61,6 @@ static HighlightSelectedString *sharedPlugin;
                                              selector:@selector(selectionDidChange:)
                                                  name:NSTextViewDidChangeSelectionNotification
                                                object:nil];
-    
-    [[NSNotificationCenter defaultCenter] addObserver:self selector:@selector(colorPanelColorDidChange:) name:NSColorPanelColorDidChangeNotification object:nil];
     
     NSUserDefaults *userD = [NSUserDefaults standardUserDefaults];
 
@@ -101,43 +98,56 @@ static HighlightSelectedString *sharedPlugin;
     }
 }
 
+// Based on: https://github.com/limejelly/Backlight-for-XCode
 - (void)setHighlightColor
 {
-    //解除与ColorSense-for-Xcode的关联
-    [self.sourceTextView.subviews enumerateObjectsUsingBlock:^(id obj, NSUInteger idx, BOOL *stop) {
-        if ([obj isKindOfClass:[NSColorWell class]]) {
-            NSColorWell *colorWell = obj;
-            [colorWell deactivate];
-        }
-    }];
-    
-    [NSColorPanel sharedColorPanel].color = self.highlightColor;
-    [[NSColorPanel sharedColorPanel] orderFront:self];
 
-    objc_setAssociatedObject([NSColorPanel sharedColorPanel], &extrnPro, @"1", OBJC_ASSOCIATION_RETAIN);
+    NSColorPanel *panel = [NSColorPanel sharedColorPanel];
+    panel.color = self.highlightColor;
+    panel.target = self;
+    panel.action = @selector(colorPanelColorDidChange:);
+    [panel orderFront:nil];
+
+    // Observe the closing of the color panel so we can remove ourself from the target.
+    [[NSNotificationCenter defaultCenter] addObserver:self
+                                             selector:@selector(colorPanelWillClose:)
+                                                 name:NSWindowWillCloseNotification object:nil];
 
 }
 
-- (void)colorPanelColorDidChange:(NSNotification*)not
+- (void)colorPanelWillClose:(NSNotification *)notification
 {
-    NSString *isHighlight = objc_getAssociatedObject([NSColorPanel sharedColorPanel], &extrnPro);
-    
-    if (isHighlight && [isHighlight boolValue]) {
-        
-        self.highlightColor = [NSColorPanel sharedColorPanel].color;
-        
-        CGFloat red = 0;
-        CGFloat green = 0;
-        CGFloat blue = 0;
-        CGFloat alpha = 0;
-        
-        [self.highlightColor getRed:&red green:&green blue:&blue alpha:&alpha];
-        
-        NSArray *array = @[@(red), @(green), @(blue), @(alpha)];
-        NSUserDefaults *userD = [NSUserDefaults standardUserDefaults];
-        [userD setObject:array forKey:@"highlightColor"];
-        [userD synchronize];
+    NSColorPanel *panel = [NSColorPanel sharedColorPanel];
+    if (panel == notification.object) {
+        panel.target = nil;
+        panel.action = nil;
+
+        [[NSNotificationCenter defaultCenter] removeObserver:self
+                                                        name:NSWindowWillCloseNotification
+                                                      object:nil];
     }
+}
+
+- (void)colorPanelColorDidChange:(id)sender
+{
+
+    NSColorPanel *panel = (NSColorPanel *)sender;
+
+    if (!panel.color) return;
+
+    self.highlightColor = panel.color;
+
+    CGFloat red = 0;
+    CGFloat green = 0;
+    CGFloat blue = 0;
+    CGFloat alpha = 0;
+
+    [self.highlightColor getRed:&red green:&green blue:&blue alpha:&alpha];
+
+    NSArray *array = @[@(red), @(green), @(blue), @(alpha)];
+    NSUserDefaults *userD = [NSUserDefaults standardUserDefaults];
+    [userD setObject:array forKey:@"highlightColor"];
+    [userD synchronize];
 
 }
 
@@ -155,12 +165,6 @@ static HighlightSelectedString *sharedPlugin;
 }
 
 -(void)selectionDidChange:(NSNotification *)noti {
-    
-    NSString *isHighlight = objc_getAssociatedObject([NSColorPanel sharedColorPanel], &extrnPro);
-    
-    if ([NSColorPanel sharedColorPanel].visible && [isHighlight boolValue]) {
-        [[NSColorPanel sharedColorPanel] orderOut:nil];
-    }
     
     if ([[noti object] isKindOfClass:[NSTextView class]]) {
         
@@ -290,22 +294,3 @@ static HighlightSelectedString *sharedPlugin;
 
 @end
 
-@implementation HighlightColorPanel
-
-- (void)orderOut:(id)sender
-{
-    objc_setAssociatedObject(self, &extrnPro, @"0", OBJC_ASSOCIATION_RETAIN);
-    [super orderOut:sender];
-}
-
-- (void)orderFront:(id)sender
-{
-    if (sender == [HighlightSelectedString sharedPlugin]) {
-        objc_setAssociatedObject(self, &extrnPro, @"1", OBJC_ASSOCIATION_RETAIN);
-    } else {
-        objc_setAssociatedObject(self, &extrnPro, @"0", OBJC_ASSOCIATION_RETAIN);
-    }
-    [super orderFront:sender];
-}
-
-@end
