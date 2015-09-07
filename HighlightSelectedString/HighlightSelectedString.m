@@ -9,6 +9,8 @@
 #import "HighlightSelectedString.h"
 #import <objc/runtime.h>
 
+static const char hilightStateKey;
+
 static HighlightSelectedString *sharedPlugin;
 
 @interface HighlightSelectedString()
@@ -45,26 +47,19 @@ static HighlightSelectedString *sharedPlugin;
 - (id)initWithBundle:(NSBundle *)plugin
 {
     if (self = [super init]) {
-        
         [[NSNotificationCenter defaultCenter] addObserver:self
                                                  selector:@selector(applicationDidFinishLaunching:)
                                                      name:NSApplicationDidFinishLaunchingNotification
                                                    object:nil];
-        
     }
     return self;
 }
 
 - (void)applicationDidFinishLaunching: (NSNotification*)noti {
     
-    [[NSNotificationCenter defaultCenter] addObserver:self
-                                             selector:@selector(selectionDidChange:)
-                                                 name:NSTextViewDidChangeSelectionNotification
-                                               object:nil];
-    
     NSUserDefaults *userD = [NSUserDefaults standardUserDefaults];
-
     NSArray *array = [userD objectForKey:@"highlightColor"];
+    
     if (array) {
         
         CGFloat red = [array[0] floatValue];
@@ -73,16 +68,13 @@ static HighlightSelectedString *sharedPlugin;
         CGFloat alpha = [array[3] floatValue];
         
         _highlightColor = [NSColor colorWithCalibratedRed:red green:green blue:blue alpha:alpha];
-
         
     } else {
         _highlightColor = [NSColor colorWithCalibratedRed:1.000 green:0.992 blue:0.518 alpha:1.000];
 
     }
     
-    
     NSMenuItem *editMenuItem = [[NSApp mainMenu] itemWithTitle:@"Edit"];
-    
     NSInteger state = [userD objectForKey:@"selectedState"]?[[userD objectForKey:@"selectedState"] integerValue]:1;
     
     if (editMenuItem) {
@@ -96,12 +88,40 @@ static HighlightSelectedString *sharedPlugin;
         [setting setTarget:self];
         [[editMenuItem submenu] addItem:setting];
     }
+    
+    [self addOrRemoveNotificationWithState:state];
+}
+
+- (void)enableState
+{
+    _aMenuItem.state = _aMenuItem.state == 1? 0 : 1;
+    
+    if (_aMenuItem.state == 0) {
+        [self removeAllHighlighting];
+    }
+    
+    [self addOrRemoveNotificationWithState:_aMenuItem.state];
+    
+    NSUserDefaults *userD = [NSUserDefaults standardUserDefaults];
+    [userD setObject:@(_aMenuItem.state) forKey:@"selectedState"];
+    [userD synchronize];
+}
+
+- (void)addOrRemoveNotificationWithState:(NSInteger)state
+{
+    if (state == 0) {
+        [[NSNotificationCenter defaultCenter] removeObserver:self name:NSTextViewDidChangeSelectionNotification object:nil];
+    } else {
+        [[NSNotificationCenter defaultCenter] addObserver:self
+                                                 selector:@selector(selectionDidChange:)
+                                                     name:NSTextViewDidChangeSelectionNotification
+                                                   object:nil];
+    }
 }
 
 // Based on: https://github.com/limejelly/Backlight-for-XCode
 - (void)setHighlightColor
 {
-
     NSColorPanel *panel = [NSColorPanel sharedColorPanel];
     panel.color = self.highlightColor;
     panel.target = self;
@@ -130,7 +150,6 @@ static HighlightSelectedString *sharedPlugin;
 
 - (void)colorPanelColorDidChange:(id)sender
 {
-
     NSColorPanel *panel = (NSColorPanel *)sender;
 
     if (!panel.color) return;
@@ -151,28 +170,10 @@ static HighlightSelectedString *sharedPlugin;
 
 }
 
-- (void)enableState
-{
-    _aMenuItem.state = _aMenuItem.state == 1? 0 : 1;
-    
-    if (_aMenuItem.state == 0) {
-        [self removeAllHighlighting];
-    }
-    
-    NSUserDefaults *userD = [NSUserDefaults standardUserDefaults];
-    [userD setObject:@(_aMenuItem.state) forKey:@"selectedState"];
-    [userD synchronize];
-}
-
 -(void)selectionDidChange:(NSNotification *)noti {
-    
     if ([[noti object] isKindOfClass:[NSTextView class]]) {
         
         NSTextView *textView = [noti object];
-        
-        if (_aMenuItem.state == 0) {
-            return;
-        }
         
         NSString *className = NSStringFromClass([textView class]);
         
@@ -185,9 +186,9 @@ static HighlightSelectedString *sharedPlugin;
             [self performSelector:@selector(todoSomething) withObject:nil afterDelay:0.1f];
             
         }
-
     }
 }
+
 - (void)todoSomething
 {
     NSTextView *textView = self.sourceTextView;
@@ -209,7 +210,6 @@ static HighlightSelectedString *sharedPlugin;
     if (self.selectedText.length) {
         [self highlightSelectedStrings];
     }
-
 }
 
 
@@ -221,11 +221,10 @@ static HighlightSelectedString *sharedPlugin;
         return;
     }
     
-    [self addBgColorWithRangArray:array];
-    
+    [self addBgColorWithRangeArray:array];
 }
 
-- (void)addBgColorWithRangArray:(NSArray*)rangeArray
+- (void)addBgColorWithRangeArray:(NSArray*)rangeArray
 {
     NSTextView *textView = self.sourceTextView;
     
@@ -238,6 +237,7 @@ static HighlightSelectedString *sharedPlugin;
     
     [textView setNeedsDisplay:YES];
     
+    objc_setAssociatedObject(textView, &hilightStateKey, @"1", OBJC_ASSOCIATION_COPY);
 }
 
 - (NSMutableArray*)rangesOfString:(NSString *)string
@@ -258,22 +258,37 @@ static HighlightSelectedString *sharedPlugin;
         if (foundRange.location != NSNotFound)
         {
             [rangArray addObject:[NSValue valueWithRange:foundRange]];
-            
         } else
             break;
     }
-    
     return rangArray;
 }
 
 - (void)removeAllHighlighting   
 {
-    NSRange documentRange = NSMakeRange(0, [[self.textStorage string] length]);
-    
+    NSUInteger length = [[self.textStorage string] length];
     NSTextView *textView = self.sourceTextView;
-
-    [textView.layoutManager removeTemporaryAttribute:NSBackgroundColorAttributeName forCharacterRange:documentRange];
     
+    NSString *hilightState = objc_getAssociatedObject(textView, &hilightStateKey);
+    if (![hilightState boolValue]) {
+        return;
+    }
+    
+    NSRange range = NSMakeRange(0, 0);
+    for (int i=0; i<length;) {
+        NSDictionary *dic = [textView.layoutManager temporaryAttributesAtCharacterIndex:i effectiveRange:&range];
+        id obj = dic[NSBackgroundColorAttributeName];
+        if (obj && [_highlightColor isEqual:obj]) {
+            
+            [textView.layoutManager removeTemporaryAttribute:NSBackgroundColorAttributeName forCharacterRange:range];
+        }
+        i += range.length;
+    }
+    
+    [textView setNeedsDisplay:YES];
+    
+    objc_setAssociatedObject(textView, &hilightStateKey, @"0", OBJC_ASSOCIATION_RETAIN);
+
 }
 
 #pragma mark Accessor Overrides
@@ -293,4 +308,3 @@ static HighlightSelectedString *sharedPlugin;
 }
 
 @end
-
