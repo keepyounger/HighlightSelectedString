@@ -183,12 +183,16 @@ static HighlightSelectedString *sharedPlugin;
 - (void)addOrRemoveNotificationWithOnlySymbols:(BOOL)state
 {
     if (!state) {
-        [[NSNotificationCenter defaultCenter] removeObserver:self name:NSTextViewDidChangeSelectionNotification object:nil];
+        [[NSNotificationCenter defaultCenter]
+         removeObserver:self
+         name:@"DVTSourceExpressionSelectedExpressionDidChangeNotification"
+         object:nil];
     } else {
-        [[NSNotificationCenter defaultCenter] addObserver:self
-                                                 selector:@selector(expressionDidChange:)
-                                                     name:@"DVTSourceExpressionSelectedExpressionDidChangeNotification"
-                                                   object:nil];
+        [[NSNotificationCenter defaultCenter]
+         addObserver:self
+         selector:@selector(expressionDidChange:)
+         name:@"DVTSourceExpressionSelectedExpressionDidChangeNotification"
+         object:nil];
     }
 }
 
