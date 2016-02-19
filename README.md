@@ -1,12 +1,13 @@
 # Introduction
-Highlight The String which is same to Selected String.
+Highlight the String which is same to selected string.
 <br/>
 高亮显示所有与选中 字符串 相同的 字符串。
 <br/>
 <br/>
 <img  src="demo.png"  alt="demo.png" />
 # Update
-In the Edit menu, you can set Highlight Color.
+##2.0
+In the Edit menu, you can enable Only Highlight Symbols.(Default is enable)
 <br/>
 <br/>
 <img  src="menu.png"  alt="menu.png" />
