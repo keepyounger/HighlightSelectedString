@@ -11,6 +11,7 @@
 		5A3A68F71A72447200AAD00A /* Foundation.framework in Frameworks */ = {isa = PBXBuildFile; fileRef = 5A3A68F61A72447200AAD00A /* Foundation.framework */; };
 		5A3A68FC1A72447200AAD00A /* HighlightSelectedString.xcscheme in Resources */ = {isa = PBXBuildFile; fileRef = 5A3A68FB1A72447200AAD00A /* HighlightSelectedString.xcscheme */; };
 		5A3A68FF1A72447200AAD00A /* HighlightSelectedString.m in Sources */ = {isa = PBXBuildFile; fileRef = 5A3A68FE1A72447200AAD00A /* HighlightSelectedString.m */; };
+		5A5613E31C76B6AC00933888 /* NSLayoutManager+SelectedSymbols.m in Sources */ = {isa = PBXBuildFile; fileRef = 5A5613E21C76B6AC00933888 /* NSLayoutManager+SelectedSymbols.m */; };
 /* End PBXBuildFile section */
 
 /* Begin PBXFileReference section */
@@ -21,6 +22,8 @@
 		5A3A68FB1A72447200AAD00A /* HighlightSelectedString.xcscheme */ = {isa = PBXFileReference; lastKnownFileType = text.xml; name = HighlightSelectedString.xcscheme; path = HighlightSelectedString.xcodeproj/xcshareddata/xcschemes/HighlightSelectedString.xcscheme; sourceTree = SOURCE_ROOT; };
 		5A3A68FD1A72447200AAD00A /* HighlightSelectedString.h */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.c.h; path = HighlightSelectedString.h; sourceTree = "<group>"; };
 		5A3A68FE1A72447200AAD00A /* HighlightSelectedString.m */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.c.objc; path = HighlightSelectedString.m; sourceTree = "<group>"; xcLanguageSpecificationIdentifier = xcode.lang.objcpp; };
+		5A5613E11C76B6AC00933888 /* NSLayoutManager+SelectedSymbols.h */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.c.h; path = "NSLayoutManager+SelectedSymbols.h"; sourceTree = "<group>"; };
+		5A5613E21C76B6AC00933888 /* NSLayoutManager+SelectedSymbols.m */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.c.objc; path = "NSLayoutManager+SelectedSymbols.m"; sourceTree = "<group>"; };
 /* End PBXFileReference section */
 
 /* Begin PBXFrameworksBuildPhase section */
@@ -67,6 +70,8 @@
 			children = (
 				5A3A68FD1A72447200AAD00A /* HighlightSelectedString.h */,
 				5A3A68FE1A72447200AAD00A /* HighlightSelectedString.m */,
+				5A5613E11C76B6AC00933888 /* NSLayoutManager+SelectedSymbols.h */,
+				5A5613E21C76B6AC00933888 /* NSLayoutManager+SelectedSymbols.m */,
 				5A3A68F91A72447200AAD00A /* Supporting Files */,
 			);
 			path = HighlightSelectedString;
@@ -149,6 +154,7 @@
 			buildActionMask = 2147483647;
 			files = (
 				5A3A68FF1A72447200AAD00A /* HighlightSelectedString.m in Sources */,
+				5A5613E31C76B6AC00933888 /* NSLayoutManager+SelectedSymbols.m in Sources */,
 			);
 			runOnlyForDeploymentPostprocessing = 0;
 		};
