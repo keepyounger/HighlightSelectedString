@@ -98,23 +98,48 @@ static HighlightSelectedString *sharedPlugin;
     
     self.onlySymbols = [userD objectForKey:HighlightOnlySymbolsKey]?[[userD objectForKey:HighlightOnlySymbolsKey] integerValue]:1;
     
+//    if (editMenuItem) {
+//        
+//        [[editMenuItem submenu] addItem:[NSMenuItem separatorItem]];
+//        
+//        self.enableMenuItem = [[NSMenuItem alloc] initWithTitle:@"Highlight Selected String" action:@selector(enableState) keyEquivalent:@""];
+//        [self.enableMenuItem setTarget:self];
+//        self.enableMenuItem.state = self.enable;
+//        [[editMenuItem submenu] addItem:self.enableMenuItem];
+//        
+//        self.onlySymbolsMenuItem = [[NSMenuItem alloc] initWithTitle:@"Only Highlight Symbols" action:@selector(onlySymbolsState) keyEquivalent:@""];
+//        [self.onlySymbolsMenuItem setTarget:self];
+//        self.onlySymbolsMenuItem.state = self.onlySymbols;
+//        [[editMenuItem submenu] addItem:self.onlySymbolsMenuItem];
+//        
+//        NSMenuItem *setting = [[NSMenuItem alloc] initWithTitle:@"Set Highlight Color" action:@selector(setHighlightColor) keyEquivalent:@""];
+//        [setting setTarget:self];
+//        [[editMenuItem submenu] addItem:setting];
+//    }
+    
     if (editMenuItem) {
-        
         [[editMenuItem submenu] addItem:[NSMenuItem separatorItem]];
         
-        self.enableMenuItem = [[NSMenuItem alloc] initWithTitle:@"Highlight Selected String" action:@selector(enableState) keyEquivalent:@""];
-        [self.enableMenuItem setTarget:self];
-        self.enableMenuItem.state = self.enable;
-        [[editMenuItem submenu] addItem:self.enableMenuItem];
+        NSMenu *highlightMenu = [[NSMenu alloc] initWithTitle:@"Highlight"];
         
-        self.onlySymbolsMenuItem = [[NSMenuItem alloc] initWithTitle:@"Only Highlight Symbols" action:@selector(onlySymbolsState) keyEquivalent:@""];
-        [self.onlySymbolsMenuItem setTarget:self];
-        self.onlySymbolsMenuItem.state = self.onlySymbols;
-        [[editMenuItem submenu] addItem:self.onlySymbolsMenuItem];
+        NSMenuItem *menuItem;
+        menuItem = [[NSMenuItem alloc] initWithTitle:@"Highlight Selected String" action:@selector(enableState) keyEquivalent:@""];
+        [menuItem setTarget:self];
+        [menuItem setState:self.enable];
+        [highlightMenu addItem:menuItem];
         
-        NSMenuItem *setting = [[NSMenuItem alloc] initWithTitle:@"Set Highlight Color" action:@selector(setHighlightColor) keyEquivalent:@""];
-        [setting setTarget:self];
-        [[editMenuItem submenu] addItem:setting];
+        menuItem = [[NSMenuItem alloc] initWithTitle:@"Only Highlight Symbols" action:@selector(onlySymbolsState) keyEquivalent:@""];
+        [menuItem setTarget:self];
+        [menuItem setState:self.onlySymbols];
+        [highlightMenu addItem:menuItem];
+        
+        menuItem = [[NSMenuItem alloc] initWithTitle:@"Set Highlight Color" action:@selector(setHighlightColor) keyEquivalent:@""];
+        [menuItem setTarget:self];
+        [highlightMenu addItem:menuItem];
+        
+        NSMenuItem *highlightMenuItem = [[NSMenuItem alloc] initWithTitle:@"Highlight" action:nil keyEquivalent:@""];
+        [highlightMenuItem setSubmenu:highlightMenu];
+        [[editMenuItem submenu] addItem:highlightMenuItem];
     }
     
 }
@@ -130,6 +155,7 @@ static HighlightSelectedString *sharedPlugin;
     [self addOrRemoveNotificationWithState:enable];
 }
 
+#pragma mark Highlight Selected String
 - (void)enableState
 {
     self.enableMenuItem.state = !self.enableMenuItem.state;
@@ -148,6 +174,7 @@ static HighlightSelectedString *sharedPlugin;
     [userD synchronize];
 }
 
+#pragma mark Only Highlight Symbols
 - (void)onlySymbolsState
 {
     if (!self.enable) {
@@ -212,6 +239,7 @@ static HighlightSelectedString *sharedPlugin;
     }
 }
 
+#pragma mark Set Highlight Color
 // Based on: https://github.com/limejelly/Backlight-for-XCode
 - (void)setHighlightColor
 {
