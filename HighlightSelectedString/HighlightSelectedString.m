@@ -98,44 +98,24 @@ static HighlightSelectedString *sharedPlugin;
     
     self.onlySymbols = [userD objectForKey:HighlightOnlySymbolsKey]?[[userD objectForKey:HighlightOnlySymbolsKey] integerValue]:1;
     
-//    if (editMenuItem) {
-//        
-//        [[editMenuItem submenu] addItem:[NSMenuItem separatorItem]];
-//        
-//        self.enableMenuItem = [[NSMenuItem alloc] initWithTitle:@"Highlight Selected String" action:@selector(enableState) keyEquivalent:@""];
-//        [self.enableMenuItem setTarget:self];
-//        self.enableMenuItem.state = self.enable;
-//        [[editMenuItem submenu] addItem:self.enableMenuItem];
-//        
-//        self.onlySymbolsMenuItem = [[NSMenuItem alloc] initWithTitle:@"Only Highlight Symbols" action:@selector(onlySymbolsState) keyEquivalent:@""];
-//        [self.onlySymbolsMenuItem setTarget:self];
-//        self.onlySymbolsMenuItem.state = self.onlySymbols;
-//        [[editMenuItem submenu] addItem:self.onlySymbolsMenuItem];
-//        
-//        NSMenuItem *setting = [[NSMenuItem alloc] initWithTitle:@"Set Highlight Color" action:@selector(setHighlightColor) keyEquivalent:@""];
-//        [setting setTarget:self];
-//        [[editMenuItem submenu] addItem:setting];
-//    }
-    
     if (editMenuItem) {
         [[editMenuItem submenu] addItem:[NSMenuItem separatorItem]];
         
         NSMenu *highlightMenu = [[NSMenu alloc] initWithTitle:@"Highlight"];
         
-        NSMenuItem *menuItem;
-        menuItem = [[NSMenuItem alloc] initWithTitle:@"Highlight Selected String" action:@selector(enableState) keyEquivalent:@""];
-        [menuItem setTarget:self];
-        [menuItem setState:self.enable];
-        [highlightMenu addItem:menuItem];
+        self.enableMenuItem = [[NSMenuItem alloc] initWithTitle:@"Highlight Selected String" action:@selector(enableState) keyEquivalent:@""];
+        [self.enableMenuItem setTarget:self];
+        [self.enableMenuItem setState:self.enable];
+        [highlightMenu addItem:self.enableMenuItem];
         
-        menuItem = [[NSMenuItem alloc] initWithTitle:@"Only Highlight Symbols" action:@selector(onlySymbolsState) keyEquivalent:@""];
-        [menuItem setTarget:self];
-        [menuItem setState:self.onlySymbols];
-        [highlightMenu addItem:menuItem];
+        self.onlySymbolsMenuItem = [[NSMenuItem alloc] initWithTitle:@"Only Highlight Symbols" action:@selector(onlySymbolsState) keyEquivalent:@""];
+        [self.onlySymbolsMenuItem setTarget:self];
+        [self.onlySymbolsMenuItem setState:self.onlySymbols];
+        [highlightMenu addItem:self.onlySymbolsMenuItem];
         
-        menuItem = [[NSMenuItem alloc] initWithTitle:@"Set Highlight Color" action:@selector(setHighlightColor) keyEquivalent:@""];
-        [menuItem setTarget:self];
-        [highlightMenu addItem:menuItem];
+        NSMenuItem *setting = [[NSMenuItem alloc] initWithTitle:@"Set Highlight Color" action:@selector(setHighlightColor) keyEquivalent:@""];
+        [setting setTarget:self];
+        [highlightMenu addItem:setting];
         
         NSMenuItem *highlightMenuItem = [[NSMenuItem alloc] initWithTitle:@"Highlight" action:nil keyEquivalent:@""];
         [highlightMenuItem setSubmenu:highlightMenu];
