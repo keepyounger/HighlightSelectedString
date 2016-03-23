@@ -10,6 +10,7 @@
 
 @interface NSLayoutManager (SelectedSymbols)
 
+@property (nonatomic, copy) NSString *highlightKey;
 @property(readonly, copy) NSArray <NSValue *> *autoHighlightTokenRanges; // @synthesize autoHighlightTokenRanges=_autoHighlightTokenRanges;
 
 @end

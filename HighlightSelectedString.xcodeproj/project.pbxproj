@@ -12,6 +12,7 @@
 		5A3A68FC1A72447200AAD00A /* HighlightSelectedString.xcscheme in Resources */ = {isa = PBXBuildFile; fileRef = 5A3A68FB1A72447200AAD00A /* HighlightSelectedString.xcscheme */; };
 		5A3A68FF1A72447200AAD00A /* HighlightSelectedString.m in Sources */ = {isa = PBXBuildFile; fileRef = 5A3A68FE1A72447200AAD00A /* HighlightSelectedString.m */; };
 		5A5613E31C76B6AC00933888 /* NSLayoutManager+SelectedSymbols.m in Sources */ = {isa = PBXBuildFile; fileRef = 5A5613E21C76B6AC00933888 /* NSLayoutManager+SelectedSymbols.m */; };
+		5A745BA91CA26EC800EE4061 /* Aspects.m in Sources */ = {isa = PBXBuildFile; fileRef = 5A745BA81CA26EC800EE4061 /* Aspects.m */; };
 /* End PBXBuildFile section */
 
 /* Begin PBXFileReference section */
@@ -24,6 +25,8 @@
 		5A3A68FE1A72447200AAD00A /* HighlightSelectedString.m */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.c.objc; path = HighlightSelectedString.m; sourceTree = "<group>"; xcLanguageSpecificationIdentifier = xcode.lang.objcpp; };
 		5A5613E11C76B6AC00933888 /* NSLayoutManager+SelectedSymbols.h */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.c.h; path = "NSLayoutManager+SelectedSymbols.h"; sourceTree = "<group>"; };
 		5A5613E21C76B6AC00933888 /* NSLayoutManager+SelectedSymbols.m */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.c.objc; path = "NSLayoutManager+SelectedSymbols.m"; sourceTree = "<group>"; };
+		5A745BA71CA26EC800EE4061 /* Aspects.h */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.c.h; path = Aspects.h; sourceTree = "<group>"; };
+		5A745BA81CA26EC800EE4061 /* Aspects.m */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.c.objc; path = Aspects.m; sourceTree = "<group>"; };
 /* End PBXFileReference section */
 
 /* Begin PBXFrameworksBuildPhase section */
@@ -72,6 +75,8 @@
 				5A3A68FE1A72447200AAD00A /* HighlightSelectedString.m */,
 				5A5613E11C76B6AC00933888 /* NSLayoutManager+SelectedSymbols.h */,
 				5A5613E21C76B6AC00933888 /* NSLayoutManager+SelectedSymbols.m */,
+				5A745BA71CA26EC800EE4061 /* Aspects.h */,
+				5A745BA81CA26EC800EE4061 /* Aspects.m */,
 				5A3A68F91A72447200AAD00A /* Supporting Files */,
 			);
 			path = HighlightSelectedString;
@@ -172,6 +177,7 @@
 			files = (
 				5A3A68FF1A72447200AAD00A /* HighlightSelectedString.m in Sources */,
 				5A5613E31C76B6AC00933888 /* NSLayoutManager+SelectedSymbols.m in Sources */,
+				5A745BA91CA26EC800EE4061 /* Aspects.m in Sources */,
 			);
 			runOnlyForDeploymentPostprocessing = 0;
 		};

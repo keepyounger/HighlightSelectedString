@@ -7,6 +7,9 @@
 //
 
 #import "NSLayoutManager+SelectedSymbols.h"
+#import <objc/runtime.h>
+
+static const char kHighlightLayoutManagerKey;
 
 @implementation NSLayoutManager (SelectedSymbols)
 
@@ -18,6 +21,17 @@
 - (void)setAutoHighlightTokenRanges:(NSArray *)autoHighlightTokenRanges
 {
     
+}
+
+- (void)setHighlightKey:(NSString *)highlightKey
+{
+    objc_setAssociatedObject(self, &kHighlightLayoutManagerKey, highlightKey, OBJC_ASSOCIATION_COPY);
+}
+
+- (NSString *)highlightKey
+{
+    NSString *hilightKey = objc_getAssociatedObject(self, &kHighlightLayoutManagerKey);
+    return hilightKey;
 }
 
 @end

@@ -6,8 +6,8 @@ Highlight the String which is same to selected string.
 <br/>
 <img  src="demo.png"  alt="demo.png" />
 # Update
-##2.0
-In the Edit menu, you can enable Only Highlight Symbols.(Default is enable)
+## 2.1
+More new features. More intelligent.
 <br/>
 <br/>
 <img  src="menu.png"  alt="menu.png" />
