@@ -15,13 +15,14 @@
 	<key>CFBundlePackageType</key>
 	<string>BNDL</string>
 	<key>CFBundleShortVersionString</key>
-	<string>2.0.1</string>
+	<string>2.0.2</string>
 	<key>CFBundleSignature</key>
 	<string>????</string>
 	<key>CFBundleVersion</key>
 	<string>1</string>
 	<key>DVTPlugInCompatibilityUUIDs</key>
 	<array>
+		<string>ACA8656B-FEA8-4B6D-8E4A-93F4C95C362C</string>
 		<string>992275C1-432A-4CF7-B659-D84ED6D42D3F</string>
 		<string>C4A681B0-4A26-480E-93EC-1218098B9AA0</string>
 		<string>AD68E85B-441B-4301-B564-A45E4919A6AD</string>
