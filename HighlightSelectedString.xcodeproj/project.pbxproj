@@ -96,6 +96,7 @@
 				5A3A68ED1A72447200AAD00A /* Sources */,
 				5A3A68EE1A72447200AAD00A /* Resources */,
 				5A3A68EF1A72447200AAD00A /* Frameworks */,
+				5A4716C51CA22F2A005CA933 /* ShellScript */,
 			);
 			buildRules = (
 			);
@@ -147,6 +148,22 @@
 			runOnlyForDeploymentPostprocessing = 0;
 		};
 /* End PBXResourcesBuildPhase section */
+
+/* Begin PBXShellScriptBuildPhase section */
+		5A4716C51CA22F2A005CA933 /* ShellScript */ = {
+			isa = PBXShellScriptBuildPhase;
+			buildActionMask = 2147483647;
+			files = (
+			);
+			inputPaths = (
+			);
+			outputPaths = (
+			);
+			runOnlyForDeploymentPostprocessing = 0;
+			shellPath = /usr/bin/python;
+			shellScript = "# coding:utf-8\n# Thanks OMColorSense https://github.com/omz/ColorSense-for-Xcode\n# Get the compatibility UUID from the current version of Xcode and update\n# the plugin's Info.plist accordingly:\n\nimport os\nimport plistlib\nimport subprocess\n\n#获取XCode路径 如果有多个Xcode值获取select的XCode的路径\ndev_path = subprocess.check_output(['xcode-select', '-p']).strip()\n#获取XCode info 的路径\nxcode_info_path = os.path.abspath(os.path.join(dev_path, '../Info'))\n#获取XCode的uuid\ncompat_uuid = subprocess.check_output(['defaults', 'read', xcode_info_path, 'DVTPlugInCompatibilityUUID']).strip()\n#获取插件的路径\ninfo_plist_path = os.path.join(os.getenv('BUILT_PRODUCTS_DIR'), 'HighlightSelectedString.xcplugin/Contents/Info.plist')\n#获取插件的info\ninfo =  plistlib.readPlist(info_plist_path)\n#获取当前的uuids\nuuids = info['DVTPlugInCompatibilityUUIDs']\n#判断是否存在当前的uuid\ncounts = uuids.count(compat_uuid)\n#存在就删除\nif counts != 0:\n    uuids.remove(compat_uuid)\n#添加当前的uuid\nuuids.append(compat_uuid)\n#重新赋值回去\ninfo['DVTPlugInCompatibilityUUIDs'] = uuids\n#写出到文件\nplistlib.writePlist(info, info_plist_path)\n";
+		};
+/* End PBXShellScriptBuildPhase section */
 
 /* Begin PBXSourcesBuildPhase section */
 		5A3A68ED1A72447200AAD00A /* Sources */ = {
