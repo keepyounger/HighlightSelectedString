@@ -259,12 +259,20 @@ static HighlightSelectedString *sharedPlugin;
     if (self.enableMenuItem.state) {
         NSString *className = NSStringFromClass([self.sourceTextView class]);
         
-        if ([className isEqualToString:@"DVTSourceTextView"]/* 代码编辑器 */&& self.symbolsOnlyMenuItem.state && self.doubleClickMenuItem.state) {
-            if (self.selectedText.length>0) {
-                [self highlightSelectedSymbols];
+        if ([className isEqualToString:@"DVTSourceTextView"]/* 代码编辑器 */) {
+            if (self.symbolsOnlyMenuItem.state) {
+                if (self.doubleClickMenuItem.state) {
+                    if (self.selectedText.length>0) {
+                        [self highlightSelectedSymbols];
+                    }
+                    else {
+                        [self removeAllHighlighting];
+                    }
+                }
             } else {
-                [self removeAllHighlighting];
+                [self highlightSelectedStrings];
             }
+
         } else {// 控制台 直接高亮
             [self highlightSelectedStrings];
         }

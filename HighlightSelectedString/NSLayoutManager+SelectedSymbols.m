@@ -15,7 +15,7 @@ static const char kHighlightLayoutManagerKey;
 
 - (NSArray *)autoHighlightTokenRanges
 {
-    return [NSArray array];
+    return nil;
 }
 
 - (void)setAutoHighlightTokenRanges:(NSArray *)autoHighlightTokenRanges
