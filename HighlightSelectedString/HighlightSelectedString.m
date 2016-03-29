@@ -25,7 +25,7 @@ static HighlightSelectedString *sharedPlugin;
 
 @property (nonatomic,copy) NSString *selectedText;
 
-@property (nonatomic, assign) NSTextView *sourceTextView;
+@property (nonatomic, unsafe_unretained) NSTextView *sourceTextView;
 @property (readonly) NSTextStorage *textStorage;
 @property (readonly) NSString *string;
 
@@ -237,10 +237,9 @@ static HighlightSelectedString *sharedPlugin;
     
     NSTextView *textView = [noti object];
     NSString *className = NSStringFromClass([textView class]);
+    self.sourceTextView = textView;
     
     if ([className isEqualToString:@"DVTSourceTextView"]/* 代码编辑器 */ || [className isEqualToString:@"IDEConsoleTextView"] /* 控制台 */) {
-        
-        self.sourceTextView = textView;
         
         //延迟0.1秒执行高亮
         [[self class] cancelPreviousPerformRequestsWithTarget:self selector:@selector(todoSomething) object:nil];
