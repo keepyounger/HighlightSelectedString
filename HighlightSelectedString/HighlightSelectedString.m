@@ -25,7 +25,7 @@ static HighlightSelectedString *sharedPlugin;
 
 @property (nonatomic,copy) NSString *selectedText;
 
-@property (nonatomic, unsafe_unretained) NSTextView *sourceTextView;
+@property (nonatomic, assign) NSTextView *sourceTextView;
 @property (readonly) NSTextStorage *textStorage;
 @property (readonly) NSString *string;
 
