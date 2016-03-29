@@ -58,8 +58,10 @@ static HighlightSelectedString *sharedPlugin;
 - (id)initWithBundle:(NSBundle *)plugin
 {
     if (self = [super init]) {
-        //一定要在初始化的时候添加Observer 否则会意外崩溃
-        [self addObserverAndNotifitions];
+        [[NSNotificationCenter defaultCenter] addObserver:self
+                                                 selector:@selector(applicationDidFinishLaunching:)
+                                                     name:NSApplicationDidFinishLaunchingNotification
+                                                   object:nil];
     }
     return self;
 }
@@ -68,6 +70,7 @@ static HighlightSelectedString *sharedPlugin;
 {
     [self loadConfig];
     [self loadMenuItems];
+    [self addObserverAndNotifitions];
 }
 
 - (void)loadConfig
@@ -160,11 +163,6 @@ static HighlightSelectedString *sharedPlugin;
                                              selector:@selector(selectionDidChange:)
                                                  name:NSTextViewDidChangeSelectionNotification
                                                object:nil];
-
-    [[NSNotificationCenter defaultCenter] addObserver:self
-                                             selector:@selector(applicationDidFinishLaunching:)
-                                                 name:NSApplicationDidFinishLaunchingNotification
-                                               object:nil];
 }
 
 - (void)observeValueForKeyPath:(NSString *)keyPath ofObject:(id)object change:(NSDictionary<NSString *,id> *)change context:(void *)context
@@ -242,9 +240,7 @@ static HighlightSelectedString *sharedPlugin;
     
     if ([className isEqualToString:@"DVTSourceTextView"]/* 代码编辑器 */ || [className isEqualToString:@"IDEConsoleTextView"] /* 控制台 */) {
         
-        if (self.sourceTextView != textView) {
-            self.sourceTextView = textView;
-        }
+        self.sourceTextView = textView;
         
         //延迟0.1秒执行高亮
         [[self class] cancelPreviousPerformRequestsWithTarget:self selector:@selector(todoSomething) object:nil];
