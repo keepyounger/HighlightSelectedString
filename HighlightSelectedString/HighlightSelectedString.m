@@ -25,7 +25,7 @@ static HighlightSelectedString *sharedPlugin;
 
 @property (nonatomic,copy) NSString *selectedText;
 
-@property (nonatomic, unsafe_unretained) NSTextView *sourceTextView;
+@property (nonatomic, readonly) NSTextView *sourceTextView;
 @property (readonly) NSTextStorage *textStorage;
 @property (readonly) NSString *string;
 
@@ -237,7 +237,6 @@ static HighlightSelectedString *sharedPlugin;
     
     NSTextView *textView = [noti object];
     NSString *className = NSStringFromClass([textView class]);
-    self.sourceTextView = textView;
     
     if ([className isEqualToString:@"DVTSourceTextView"]/* 代码编辑器 */ || [className isEqualToString:@"IDEConsoleTextView"] /* 控制台 */) {
         
@@ -268,7 +267,7 @@ static HighlightSelectedString *sharedPlugin;
                 [self highlightSelectedStrings];
             }
 
-        } else {// 控制台 直接高亮
+        } else if ([className isEqualToString:@"IDEConsoleTextView"] /* 控制台 直接高亮*/) {
             [self highlightSelectedStrings];
         }
     }
@@ -475,6 +474,15 @@ static HighlightSelectedString *sharedPlugin;
     self.highlightColor = panel.color;
     
     [self resetHighlight];
+}
+
+- (NSTextView *)sourceTextView
+{
+    NSResponder *responder = [[NSApp keyWindow] firstResponder];
+    if ([responder isKindOfClass:[NSTextView class]]) {
+        return (NSTextView *)responder;
+    }
+    return nil;
 }
 
 #pragma mark ---line---
