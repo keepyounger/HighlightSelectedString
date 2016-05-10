@@ -6,7 +6,7 @@ Highlight the String which is same to selected string.
 <br/>
 <img  src="demo.png"  alt="demo.png" />
 # Update
-## 2.1
+## 2.2
 More new features. More intelligent.
 <br/>
 <br/>

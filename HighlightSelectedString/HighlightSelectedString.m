@@ -11,11 +11,11 @@
 #import <objc/runtime.h>
 #import "Aspects.h"
 
-#define HighlightColorKey @"HighlightColorKey"
-#define HighlightEnableStateKey @"HighlightEnableStateKey"
-#define HighlightOnlySymbolsKey @"HighlightOnlySymbolsKey"
-#define HighlightDoubleClickKey @"HighlightDoubleClickKey"
-
+#define HighlightColorKey           @"HighlightColorKey"
+#define HighlightEnableStateKey     @"HighlightEnableStateKey"
+#define HighlightOnlySymbolsKey     @"HighlightOnlySymbolsKey"
+#define HighlightDoubleClickKey     @"HighlightDoubleClickKey"
+#define HighlightCaseInsensitiveKey @"HighlightCaseInsensitive"
 
 static const char hilightStateKey;
 
@@ -30,6 +30,7 @@ static HighlightSelectedString *sharedPlugin;
 @property (readonly) NSString *string;
 
 @property (nonatomic, strong) NSMenuItem *enableMenuItem;
+@property (nonatomic, strong) NSMenuItem *caseInsensitiveMenuItem;
 @property (nonatomic, strong) NSMenuItem *symbolsOnlyMenuItem;
 @property (nonatomic, strong) NSMenuItem *doubleClickMenuItem;
 
@@ -102,6 +103,8 @@ static HighlightSelectedString *sharedPlugin;
     
     BOOL doubleClickState = [userD objectForKey:HighlightDoubleClickKey]?[[userD objectForKey:HighlightDoubleClickKey] integerValue]:0;
     
+    BOOL caseInsensitiveState = [userD objectForKey:HighlightCaseInsensitiveKey]?[[userD objectForKey:HighlightCaseInsensitiveKey] integerValue]:1;
+    
     if (editMenuItem) {
         [[editMenuItem submenu] addItem:[NSMenuItem separatorItem]];
         
@@ -111,6 +114,11 @@ static HighlightSelectedString *sharedPlugin;
         [self.enableMenuItem setTarget:self];
         [self.enableMenuItem setState:enableState];
         [highlightMenu addItem:self.enableMenuItem];
+        
+        self.caseInsensitiveMenuItem = [[NSMenuItem alloc] initWithTitle:@"Case Insensitive" action:@selector(caseInsensitiveClick) keyEquivalent:@""];
+        [self.caseInsensitiveMenuItem setTarget:self];
+        [self.caseInsensitiveMenuItem setState:caseInsensitiveState];
+        [highlightMenu addItem:self.caseInsensitiveMenuItem];
         
         NSMenu *symbolsOnlyMenu = [[NSMenu alloc] initWithTitle:@"Symbols Only Menu"];
         
@@ -195,14 +203,25 @@ static HighlightSelectedString *sharedPlugin;
         [self removeAllHighlighting];
         self.symbolsOnlyMenuItem.action = NULL;
         self.doubleClickMenuItem.action = NULL;
+        self.caseInsensitiveMenuItem.action = NULL;
         
     } else{
         self.symbolsOnlyMenuItem.action = @selector(symbolsOnlyClick);
         self.doubleClickMenuItem.action = @selector(doubleClick);
+        self.caseInsensitiveMenuItem.action = @selector(caseInsensitiveClick);
     }
     
     NSUserDefaults *userD = [NSUserDefaults standardUserDefaults];
     [userD setObject:@(self.enableMenuItem.state) forKey:HighlightEnableStateKey];
+    [userD synchronize];
+}
+
+- (void)caseInsensitiveClick
+{
+    self.caseInsensitiveMenuItem.state = !self.caseInsensitiveMenuItem.state;
+    
+    NSUserDefaults *userD = [NSUserDefaults standardUserDefaults];
+    [userD setObject:@(self.caseInsensitiveMenuItem.state) forKey:HighlightCaseInsensitiveKey];
     [userD synchronize];
 }
 
@@ -312,24 +331,18 @@ static HighlightSelectedString *sharedPlugin;
     
     NSUInteger length = [self.string length];
     
-    NSRange searchRange = NSMakeRange(0, length);
-    NSRange foundRange = NSMakeRange(0, 0);
+    NSString *regexString = string;
     
-    NSMutableArray *rangArray = [NSMutableArray array];
+    NSRegularExpression *regex = [[NSRegularExpression alloc] initWithPattern:regexString options:self.caseInsensitiveMenuItem.state?NSRegularExpressionCaseInsensitive:0 error:nil];
+    NSArray<NSTextCheckingResult *> *matches = [regex matchesInString:self.string options:0 range:NSMakeRange(0, length)];
     
-    while (YES)
-    {
-        foundRange = [self.string rangeOfString:string options:0 range:searchRange];
-        NSUInteger searchRangeStart = foundRange.location + foundRange.length;
-        searchRange = NSMakeRange(searchRangeStart, length - searchRangeStart);
-        
-        if (foundRange.location != NSNotFound)
-        {
-            [rangArray addObject:[NSValue valueWithRange:foundRange]];
-        } else
-            break;
+    NSMutableArray *rangeArray = [NSMutableArray array];
+    
+    for (NSTextCheckingResult *result in matches) {
+        [rangeArray addObject:[NSValue valueWithRange:result.range]];
     }
-    return rangArray;
+    
+    return rangeArray;
 }
 
 
