@@ -333,7 +333,7 @@ static HighlightSelectedString *sharedPlugin;
     
     NSString *regexString = string;
     
-    NSRegularExpression *regex = [[NSRegularExpression alloc] initWithPattern:regexString options:self.caseInsensitiveMenuItem.state?NSRegularExpressionCaseInsensitive:0 error:nil];
+    NSRegularExpression *regex = [[NSRegularExpression alloc] initWithPattern:regexString options:self.caseInsensitiveMenuItem.state?NSRegularExpressionCaseInsensitive:0 | NSRegularExpressionIgnoreMetacharacters error:nil];
     NSArray<NSTextCheckingResult *> *matches = [regex matchesInString:self.string options:0 range:NSMakeRange(0, length)];
     
     NSMutableArray *rangeArray = [NSMutableArray array];
